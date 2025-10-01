@@ -9,6 +9,7 @@ from fipy import (
     TransientTerm,
     DiffusionTerm,
     ConvectionTerm,
+    FaceVariable,
 )
 
 
@@ -92,27 +93,49 @@ class FiPySolver:
             history (list[np.ndarray]): List of solutions at each step.
         """
         u0 = self.gaussian_init(sigma=sigma, center=center)
-        u = CellVariable(name="u", mesh=self.mesh, value=u0)
 
-        # Define PDE
+        # IMPORTANT: enable old values for time-stepping
+        u = CellVariable(name="u", mesh=self.mesh, value=u0, hasOld=True)
+
         if equation == "burgers":
+            # Face-centered velocity for ConvectionTerm
+            nfaces = self.mesh.numberOfFaces
             if self.dim == 1:
-                eq = TransientTerm() + ConvectionTerm(coeff=(u,)) - DiffusionTerm(coeff=nu)
+                vel = FaceVariable(mesh=self.mesh, rank=1, value=(np.zeros(nfaces),))
             else:
-                eq = TransientTerm() + ConvectionTerm(coeff=(u, u)) - DiffusionTerm(coeff=nu)
+                vel = FaceVariable(mesh=self.mesh, rank=1,
+                                value=(np.zeros(nfaces), np.zeros(nfaces)))
+
+            # Semi-implicit in u, explicit in coeff (vel from previous iterate)
+            eq = TransientTerm() + ConvectionTerm(coeff=vel) - DiffusionTerm(coeff=nu)
+
         elif equation == "diffusion":
+            # unchanged diffusion branch
             eq = TransientTerm() - DiffusionTerm(coeff=D)
         else:
             raise ValueError("Unknown equation. Use 'burgers' or 'diffusion'.")
 
-        # Time stepping
         history = [u.value.copy()]
+
+        # Initialize old = current before the first step
+        u.updateOld()
+
         for _ in range(steps):
+            if equation == "burgers":
+                # vel = 0.5 * u_face(previous)
+                uf = u.old.faceValue
+                if self.dim == 1:
+                    vel.setValue((0.5 * uf,))
+                else:
+                    vel.setValue((0.5 * uf, 0.5 * uf))
+
             eq.solve(var=u, dt=dt)
             history.append(u.value.copy())
 
-        return history
+            # Prepare for next iteration (needed by Burgers)
+            u.updateOld()
 
+        return history
 
 # # WORKS FOR DIFFUSION, not for burgers
 # def solve(
