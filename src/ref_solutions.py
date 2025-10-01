@@ -13,7 +13,7 @@ from fipy import (
 
 
 # TODO: use better approach to check dimensions is right
-class PDESolver:
+class FiPySolver:
     """
     PDE Solver for Burgers' and Diffusion equations in 1D and 2D using FiPy.
     """
@@ -68,68 +68,49 @@ class PDESolver:
     # TODO: DELETE, DO NOT WORK
     def solve(
         self,
-        equation: str = "burgers",
-        nu: float = 0.1,       # viscosity for Burgers
-        D: float = 0.1,        # diffusion coefficient
-        dt: float = 0.01,
-        steps: int = 100,
-        sigma: float = 0.15,
+        equation="burgers",
+        nu=0.1,
+        D=0.1,
+        dt=0.01,
+        steps=100,
+        sigma=0.15,
         center=None,
     ):
         """
         Solve PDE.
 
         Args:
-            equation: "burgers" or "diffusion".
-            nu: Viscosity for Burgers.
-            D: Diffusion coefficient.
-            dt: Time step.
-            steps: Number of time steps.
-            sigma: Gaussian width for initial condition.
-            center: Gaussian center.
+            equation (str): "burgers" or "diffusion".
+            nu (float): Viscosity for Burgers.
+            D (float): Diffusion coefficient.
+            dt (float): Time step.
+            steps (int): Number of time steps.
+            sigma (float): Gaussian width for initial condition.
+            center (tuple): Gaussian center.
 
         Returns:
-            history: list[np.ndarray], solution snapshots (including t=0).
+            history (list[np.ndarray]): List of solutions at each step.
         """
-        # Initial condition
         u0 = self.gaussian_init(sigma=sigma, center=center)
-        # IMPORTANT: hasOld=True so we can use u.updateOld() and u.old.faceValue
-        u = CellVariable(name="u", mesh=self.mesh, value=u0, hasOld=True)
+        u = CellVariable(name="u", mesh=self.mesh, value=u0)
 
-        history = [u.value.copy()]
-
+        # Define PDE
         if equation == "burgers":
-            # Split step: explicit convection (uses u.old.faceValue), then implicit diffusion.
-            for _ in range(steps):
-                # Save previous solution for explicit convection
-                u.updateOld()
-
-                # 1) Explicit convection update
-                # 1D: convection coeff is a single face field; 2D: tuple (vx, vy)
-                if self.dim == 1:
-                    conv_coeff = (u.old.faceValue,)
-                else:
-                    conv_coeff = (u.old.faceValue, u.old.faceValue)
-
-                convection_eq = TransientTerm() + ConvectionTerm(coeff=conv_coeff)
-                convection_eq.solve(var=u, dt=dt)
-
-                # 2) Implicit diffusion update
-                diffusion_eq = TransientTerm() - DiffusionTerm(coeff=nu)
-                diffusion_eq.solve(var=u, dt=dt)
-
-                history.append(u.value.copy())
-
+            if self.dim == 1:
+                eq = TransientTerm() + ConvectionTerm(coeff=(u,)) - DiffusionTerm(coeff=nu)
+            else:
+                eq = TransientTerm() + ConvectionTerm(coeff=(u, u)) - DiffusionTerm(coeff=nu)
         elif equation == "diffusion":
-            # Standard implicit diffusion scheme
             eq = TransientTerm() - DiffusionTerm(coeff=D)
-            for _ in range(steps):
-                eq.solve(var=u, dt=dt)
-                history.append(u.value.copy())
-
         else:
             raise ValueError("Unknown equation. Use 'burgers' or 'diffusion'.")
-        
+
+        # Time stepping
+        history = [u.value.copy()]
+        for _ in range(steps):
+            eq.solve(var=u, dt=dt)
+            history.append(u.value.copy())
+
         return history
 
 
@@ -176,6 +157,11 @@ class PDESolver:
 
 #         # Time stepping
 #         history = [u.value.copy()]
+#         for _ in range(steps):
+#             eq.solve(var=u, dt=dt)
+#             history.append(u.value.copy())
+
+#         return history.copy()]
 #         for _ in range(steps):
 #             eq.solve(var=u, dt=dt)
 #             history.append(u.value.copy())

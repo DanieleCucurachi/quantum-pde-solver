@@ -10,6 +10,7 @@ from qiskit_aer import Aer, AerSimulator
 
 
 # --- target Gaussian in 1D ---
+# TODO: add domani here!!!
 def gaussian_state(n_qubits: int, sigma=0.15):
     L = 2**n_qubits
     xs = np.linspace(0, 1, L, endpoint=False)  # grid
