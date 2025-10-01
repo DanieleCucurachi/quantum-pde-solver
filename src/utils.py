@@ -20,7 +20,7 @@ def gaussian_state(n_qubits: int, sigma=0.15):
 
 # --- fidelity ---
 def fidelity(params, ansatz, target_state):
-    qc = ansatz.qc(params[0])  # TODO: this will have to be changed for multiple params
+    qc = ansatz.qc(params)  # TODO: this will have to be changed for multiple params
     backend = Aer.get_backend("statevector_simulator")
     sv = Statevector.from_instruction(transpile(qc, backend))
     psi = sv.data

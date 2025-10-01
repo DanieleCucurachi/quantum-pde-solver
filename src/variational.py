@@ -2,7 +2,7 @@ import numpy as np
 from qiskit import QuantumCircuit
 from typing import Optional
 
-
+# TODO: use parametrized circuits
 class Ansatz:
     """va
     Hardware-efficient variational ansatz.
@@ -65,6 +65,7 @@ class SingleParameterAnsatz:
         self.depth = depth
         self.n_params = 1
     
+    # TODO: find better solution to account for lambda
     def qc(self, lambda_param: float) -> QuantumCircuit:
         """
         Create single-parameter ansatz circuit.
@@ -75,6 +76,11 @@ class SingleParameterAnsatz:
         Returns:
             Quantum circuit
         """
+
+        if isinstance(lambda_param, (list, np.ndarray)):
+            lambda_param = float(lambda_param[0])
+        else:
+            lambda_param = float(lambda_param)
         
         qc = QuantumCircuit(self.n_qubits)
         
