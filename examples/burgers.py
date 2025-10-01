@@ -71,7 +71,7 @@ def main():
     # Data logging
     rows = []
     save_every = 1  # adjust if you want fewer writes
-    exp_path = Path("exp_results/burgers")
+    exp_path = Path("examples/exp_results/burgers")
     exp_path.mkdir(parents=True, exist_ok=True)
     csv_path = exp_path / "data.csv"  # will save in the current working directory
 

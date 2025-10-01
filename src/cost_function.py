@@ -219,7 +219,6 @@ class CostFunction:
         self.tau = tau
         self.n_qubits = n_qubits
         self.depth = depth
-        self.first = True  # for ancilla position print only once # TODO: remove
 
     
     def ancilla_z_exp(self, circ: QuantumCircuit, shots: Optional[float]=None) -> float:
@@ -239,16 +238,15 @@ class CostFunction:
             p0, p1 = 0.0, 0.0
 
             # TODO: simplify here, acnilla is always either n-1 or 0
-            # TODO: print out the ancilla position and modify thsi accordingly
             # locate ancilla qubit position
-            anc = [q for q in circ.qubits if q._register.name == 'anc'][0]
-            anc_pos = t_qc.find_bit(anc).index
-            if self.first: # TODO: remove
-                print("\n\nANCILLA POSITION:", anc_pos, "\n\n")  # 0
-                self.first = False
+            # anc = [q for q in circ.qubits if q._register.name == 'anc'][0]
+            # anc_pos = t_qc.find_bit(anc).index
+            # if self.first: # TODO: remove
+            #     print("\n\nANCILLA POSITION:", anc_pos, "\n\n")  # it prints out 0
+            #     self.first = False
 
             for idx, p in enumerate(probs):
-                anc_bit = (idx >> anc_pos) & 1  # this is probably wrong like this
+                anc_bit = (idx >> n-1) & 1  # TODO: check if correct
                 if anc_bit == 0:
                     p0 += p
                 else:
