@@ -1,7 +1,5 @@
 # TODO: write proper test script with parser
-
-#!/usr/bin/env python3
-# Minimal Burgers optimization script (SciPy only), using your existing CostFunction.
+# TODO: gathe r all parameters related to circuit in one and all parameters related to train in other
 
 import os
 import sys
@@ -12,14 +10,8 @@ from pathlib import Path
 
 from scipy.optimize import minimize
 
-# # Make sure src/ is on path
-# THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-# SRC_DIR = os.path.abspath(os.path.join(THIS_DIR, "..", "src"))
-# if SRC_DIR not in sys.path:
-#     sys.path.insert(0, SRC_DIR)
-
 from src.cost_function import CostFunction        # your class
-from src.variational import SingleParameterAnsatz, Ansatz # your simple ansatz
+from src.variational import SingleParameterAnsatz # your simple ansatz
 from src.utils import set_seeds, fidelity, gaussian_state  # your utility
 
 from qiskit.quantum_info import Statevector
@@ -27,7 +19,7 @@ from qiskit.quantum_info import Statevector
 def optimize_step(cost_obj, init_params):
     """Optimize cost function for one time step."""
     def obj_fn(lambdas):
-        return cost_obj.compute_cost_via_qc(lambdas)
+        return cost_obj.cost(lambdas)
     res = minimize(obj_fn, init_params, method="COBYLA")  # or SPSA for hardware
     return res.x, res.fun
 
@@ -73,7 +65,7 @@ def main():
     save_every = 1  # adjust if you want fewer writes
     exp_path = Path("examples/exp_results/burgers")
     exp_path.mkdir(parents=True, exist_ok=True)
-    csv_path = exp_path / "data.csv"  # will save in the current working directory
+    csv_path = exp_path / "data_1d.csv"  # will save in the current working directory
 
     print("\n  ------ Time Evolution ------\n")
     for step in range(nsteps):
@@ -110,9 +102,9 @@ def main():
     print(f"Saved results to {csv_path.resolve()}")
 
     # Optional: plot results
-    from src.plot import time_evolution_dataframe, plot_time_evolution
+    from src.plot_copy import time_evolution_dataframe, plot_time_evolution
     df_funcs = time_evolution_dataframe(df, n_qubits, depth, domain)
-    plot_time_evolution(df_funcs, max_lines=6, outfile=str(exp_path / "time_evo.png"))
+    plot_time_evolution(df_funcs, max_lines=6, outfile=str(exp_path / "time_evo_1d.png"))
     
     # TODO. in the plots I do not see the last point t=5, why?
 

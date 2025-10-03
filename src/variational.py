@@ -2,8 +2,23 @@ import numpy as np
 from qiskit import QuantumCircuit
 from typing import Optional
 
-# TODO: use parametrized circuits
-class Ansatz:
+# TODO: use parametrized circuits, and also create qc once and reuse it
+# TODO: use qiskit optimizers?
+
+# class Ansatz(ABC):
+#     """Variational ansatz base class."""
+    
+#     @abstractmethod
+#     def qc(self, params: np.ndarray) -> QuantumCircuit:
+#         """Create quantum circuit for given parameters."""
+#         pass
+    
+#     @abstractmethod
+#     def random_params(self) -> np.ndarray:
+#         """Generate random parameters for the ansatz."""
+#         pass
+
+class HEAnsatz:
     """va
     Hardware-efficient variational ansatz.
     
@@ -32,6 +47,9 @@ class Ansatz:
         Returns:
             Quantum circuit
         """
+
+        # Convert params to np.ndarray if it's a list or similar
+        params = np.array(params)
         
         # Reshape params if needed
         if params.ndim == 1:

@@ -49,15 +49,12 @@ def make_seeded_aer_simulator(seed: int) -> AerSimulator:
     sim.set_options(seed_simulator=seed)
     return sim
 
-# # --- run example ---
-# n_qubits, depth = 3, 2
-# ansatz = Ansatz(n_qubits, depth)
 
-# target = gaussian_state(n_qubits)
-# init_params = ansatz.random_params()
-
-# res = minimize(fidelity, init_params, args=(ansatz, target),
-#                method="COBYLA", options={"maxiter": 200})
-
-# print("Optimal λ parameters:", res.x)
-# print("Final fidelity:", -res.fun)
+# # Set random seed for reproducibility
+# qiskit_algorithms.utils.algorithm_globals.random_seed = self.random_seed
+# # TODO: include qiskit seed
+# try:
+#     backend.simulator.options.seed_simulator = self.random_seed
+# except:
+#     # If the backend does not have a simulator, we ignore this setting.
+#     pass

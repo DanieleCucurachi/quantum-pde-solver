@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 from qiskit.quantum_info import Statevector
-from src.variational import SingleParameterAnsatz, HEAnsatz
+from src.variational import SingleParameterAnsatz
 
+# TODO: this is all 1D, we want 2D eventually
 
 def reconstruct_function(lambda0: float,
-                         lambdas: np.ndarray | list[float],
+                         lam: float,
                          n_qubits: int,
                          depth: int,
                          domain: list[float]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -22,7 +23,7 @@ def reconstruct_function(lambda0: float,
     N = 2 ** n_qubits
     x = np.linspace(domain[0], domain[1], N, endpoint=True)
 
-    qc = HEAnsatz(n_qubits=n_qubits, depth=depth).qc(lambdas)
+    qc = SingleParameterAnsatz(n_qubits=n_qubits, depth=depth).qc(lam)
     psi = Statevector.from_instruction(qc).data  # shape (N,)
 
     # With Ry-only ansatz and CNOTs, amplitudes are real; be explicit:
@@ -43,7 +44,7 @@ def time_evolution_dataframe(df_params: pd.DataFrame,
     for _, row in df_params.iterrows():
         x, f, psi = reconstruct_function(
             lambda0=float(row["lambda0"]),
-            lambdas=row["lambdas"],
+            lam=float(row["lambda"]),
             n_qubits=n_qubits,
             depth=depth,
             domain=domain,
