@@ -103,6 +103,21 @@ class BasePDE(ABC):
                 else:
                     N1 += count
             return (N0 - N1) / shots
+        
+    def update_state(
+        self,
+        lambda0: float,
+        lambdas: np.ndarray | list[float],
+    ) -> None:
+        """
+        Update the internal state of the PDE object with new parameters.
+
+        Args:
+            lambda0 (float): New scaling parameter.
+            lambdas (np.ndarray | list[float]): New variational parameters for the ansatz circuit.
+        """
+        self.lambda0 = lambda0
+        self.lambdas = lambdas
 
     @abstractmethod
     def cost(self, lambdas: np.ndarray | list[float]) -> float:
@@ -199,10 +214,6 @@ class Burgers1D(BasePDE):
         # 5) cost up to const: |λ0|^2 - 2 Re{ λ0 (tilde_λ0)^* s }
         cost = (lambda0_new ** 2) - 2.0 * np.real(lambda0_new * np.conj(self.lambda0)) * s
 
-        # 6) update internal state with new params
-        self.lambda0 = lambda0_new
-        self.lambdas = lambdas_new
-
         return cost
 
 
@@ -271,10 +282,6 @@ class Burgers2D(Burgers1D):
 
         # 5) cost up to const: |λ0|^2 - 2 Re{ λ0 (tilde_λ0)^* s }
         cost = (lambda0_new ** 2) - 2.0 * np.real(lambda0_new * np.conj(self.lambda0)) * s
-
-        # 6) update internal state with new params
-        self.lambda0 = lambda0_new
-        self.lambdas = lambdas_new
 
         return cost
     

@@ -65,11 +65,8 @@ def run_time_evolution(
     lambda0: float,
     lambdas: np.ndarray | list[float],
     pde: BasePDE,
-    nu: float,
-    tau: float,
-    n_qubits: int,
-    depth: int,
-    nsteps: int
+    nsteps: int,
+    verbose: bool = True,
 ) -> pd.DataFrame:
     """
     Run the time evolution loop for the variational PDE solver.
@@ -80,11 +77,8 @@ def run_time_evolution(
         lambda0 (float): Initial scaling parameter.
         lambdas (np.ndarray | list[float]): Initial ansatz parameters.
         pde (BasePDE): PDE object with a .cost(lambdas) method.
-        nu (float): Viscosity or diffusion parameter.
-        tau (float): Time step size.
-        n_qubits (int): Number of qubits.
-        depth (int): Ansatz depth.
         nsteps (int): Number of time steps.
+        verbose (bool, optional): Whether to print progress. Default is True.
 
     Returns:
         pd.DataFrame: DataFrame with columns ["step", "time", "lambda0", "lambdas", "cost"] 
@@ -104,12 +98,16 @@ def run_time_evolution(
     print(f"Step 0/{nsteps}, time=0.00")
 
     for step in range(nsteps):
-        t = (step + 1) * tau
-        print(f"Step {step + 1}/{nsteps}, time={t:.2f}")
+        t = (step + 1) * pde.tau
         params, cost_val = optimize_step(
-            pde=pde(lambda0, lambdas, nu, tau, n_qubits, depth),
+            pde=pde,
             init_params=params
         )
+        # Update PDE internal state for tilde U and lambda0 in next step
+        pde.update_state(params[0], params[1:])
+
+        if verbose:
+            print(f"Step {step + 1}/{nsteps} -> cost: {cost_val}   (time={t:.2f})")
         rows.append({
             "step": step,
             "time": t,
