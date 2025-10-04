@@ -11,9 +11,9 @@ from pathlib import Path
 from scipy.optimize import minimize
 
 from src.cost_function import CostFunction, Burgers        # your class
-from src.variational import SingleParameterAnsatz, HEAnsatz # your simple ansatz
+from src.ansatz import SingleParameterAnsatz, HEAnsatz # your simple ansatz
 from src.utils import set_seeds, fidelity, gaussian_state  # your utility
-from src.plot import time_evolution_dataframe, plot_time_evolution
+from src.plot import time_evolution_dataframe_1d, plot_time_evolution_1d
 
 from qiskit.quantum_info import Statevector
 
@@ -100,8 +100,8 @@ def main():
     print(f"Saved results to {csv_path.resolve()}")
 
     # Optional: plot results
-    df_funcs = time_evolution_dataframe(df, n_qubits, depth, domain)
-    plot_time_evolution(df_funcs, max_lines=6, outfile=str(exp_path / "time_evo_1d_mp.png"))
+    df_funcs = time_evolution_dataframe_1d(df, n_qubits, depth, domain)
+    plot_time_evolution_1d(df_funcs, max_lines=6, outfile=str(exp_path / "time_evo_1d_mp.png"))
     
     # TODO. in the plots I do not see the last point t=5, why?
 

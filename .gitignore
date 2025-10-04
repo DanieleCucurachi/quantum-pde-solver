@@ -1,3 +1,5 @@
 # Ignore experiment results
 exp_results_old/
+copies/
 pieces_of_code.py
+src/__pycache__/

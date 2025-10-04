@@ -11,7 +11,7 @@ from pathlib import Path
 from scipy.optimize import minimize
 
 from src.cost_function import CostFunction        # your class
-from src.variational import SingleParameterAnsatz # your simple ansatz
+from src.ansatz import SingleParameterAnsatz # your simple ansatz
 from src.utils import set_seeds, fidelity, gaussian_state  # your utility
 
 from qiskit.quantum_info import Statevector
@@ -48,7 +48,7 @@ def main():
     res = minimize(fidelity, init_param, args=(ansatz, target),
                method="COBYLA", options={"maxiter": 200})
     
-    lambda1 = res.x[0]
+    lambda1 = res.x
     print("\n  ------ Initial State Preparation ------\n")
     print("Optimal λ parameters:", res.x)
     print("Final fidelity:", -res.fun)
@@ -102,7 +102,7 @@ def main():
     print(f"Saved results to {csv_path.resolve()}")
 
     # Optional: plot results
-    from src.plot_copy import time_evolution_dataframe, plot_time_evolution
+    from copies.plot_copy import time_evolution_dataframe, plot_time_evolution
     df_funcs = time_evolution_dataframe(df, n_qubits, depth, domain)
     plot_time_evolution(df_funcs, max_lines=6, outfile=str(exp_path / "time_evo_1d.png"))
     

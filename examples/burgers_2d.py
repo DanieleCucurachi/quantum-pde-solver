@@ -11,7 +11,7 @@ from pathlib import Path
 from scipy.optimize import minimize
 
 from src.cost_function import Burgers2D        # your class
-from src.variational import HEAnsatz # your simple ansatz
+from src.ansatz import HEAnsatz # your simple ansatz
 from src.utils import set_seeds, fidelity, gaussian_state  # your utility
 from src.plot import time_evolution_dataframe_2d, plot_time_evolution_2d
 

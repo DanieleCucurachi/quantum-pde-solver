@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from qiskit import QuantumCircuit, QuantumRegister, transpile
 from qiskit_aer import Aer
 
-from .variational import SingleParameterAnsatz, HEAnsatz
+from .ansatz import SingleParameterAnsatz, HEAnsatz
 
 # TODO: account for arbitrary n of qubits, now that you know each building block it should be easy
 # TODO: refacotr into a pythonic class

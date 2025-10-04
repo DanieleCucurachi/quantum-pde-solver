@@ -1,64 +1,126 @@
 from __future__ import annotations
 
-# TODO: update the training logic so that qc are not created everytime from scratch
+from abc import ABC, abstractmethod
 
-from qiskit.circuit import QuantumCircuit, ParameterVector, Parameter
 import numpy as np
+from qiskit import QuantumCircuit
 
-class Ansatz:
-    """
-    Hardware-efficient variational ansatz with symbolic parameters.
+
+class BaseAnsatz(ABC):
+    """Variational ansatz base class."""
+
+    def __init__(self, n_qubits: int, depth: int) -> None:
+        """
+        Initialize ansatz.
+        
+        Args:
+            n_qubits (int): Number of qubits
+            depth (int): Number of layers
+        """
+        self.n_qubits = n_qubits
+        self.depth = depth
+    
+    @abstractmethod
+    def qc(self, params: np.ndarray | list[float]) -> QuantumCircuit:
+        """Create quantum circuit for given parameters."""
+        pass
+    
+
+class HEAnsatz(BaseAnsatz):
+    """Hardware-efficient ansatz.
+    
     Structure: depth layers of Ry rotations + CNOT chain entanglers.
     """
     
-    def __init__(self, n_qubits: int, depth: int):
-        self.n_qubits = n_qubits
-        self.depth = depth
+    def __init__(self, n_qubits: int, depth: int) -> None:
+        """
+        Initialize ansatz.
+        
+        Args:
+            n_qubits (int): Number of qubits
+            depth (int): Number of layers
+        """
+        super().__init__(n_qubits, depth)
         self.n_params = n_qubits * depth
-        self.params = ParameterVector("lambda", self.n_params)
+    
+    def qc(self, params: np.ndarray | list[float]) -> QuantumCircuit:
+        """
+        Create hardware-efficient ansatz circuit.
         
-        # build circuit ONCE with symbolic parameters
-        self._qc = QuantumCircuit(self.n_qubits)
-        idx = 0
-        for layer in range(self.depth):
-            for q in range(self.n_qubits):
-                self._qc.ry(self.params[idx], q)
-                idx += 1
-            for q in range(self.n_qubits - 1):
-                self._qc.cx(q, q + 1)
+        Args:
+            params (np.ndarray | list[float]): Parameter array (flat or shape (depth, n_qubits))
+            
+        Returns:
+            QuantumCircuit
+        """
 
-    @property
-    def qc(self) -> QuantumCircuit:
-        """Return the parameterized circuit (symbolic)."""
-        return self._qc
-
-    def bind(self, values: np.ndarray) -> QuantumCircuit:
-        """Bind parameter values without rebuilding the circuit."""
-        return self._qc.bind_parameters({self.params[i]: values[i] for i in range(self.n_params)})
-
-
-class SingleParameterAnsatz:
-    """
-    Single-parameter ansatz with symbolic parameter λ.
-    """
-    def __init__(self, n_qubits: int, depth: int):
-        self.n_qubits = n_qubits
-        self.depth = depth
-        self.param = Parameter("lambda")
+        # Convert params to np.ndarray if it's a list or similar
+        params = np.array(params)
         
-        # build symbolic circuit ONCE
-        self._qc = QuantumCircuit(self.n_qubits)
+        # Reshape params if needed
+        if params.ndim == 1:
+            params = params.reshape(self.depth, self.n_qubits)
+        
+        qc = QuantumCircuit(self.n_qubits)
+        
         for layer in range(self.depth):
+            # Ry rotations on each qubit
             for q in range(self.n_qubits):
-                self._qc.ry(self.param, q)
+                qc.ry(params[layer, q], q)
+            
+            # CNOT chain: 0->1->2->...->n-1
             for q in range(self.n_qubits - 1):
-                self._qc.cx(q, q + 1)
+                qc.cx(q, q + 1)
+        
+        return qc
+    
+    def random_params(self) -> np.ndarray:
+        """Generate random parameters in [-π, π]."""
+        return np.random.uniform(-np.pi, np.pi, self.n_params)
 
-    @property
-    def qc(self) -> QuantumCircuit:
-        """Return the parameterized circuit (symbolic)."""
-        return self._qc
 
-    def bind(self, value: float) -> QuantumCircuit:
-        """Bind λ to a specific float value."""
-        return self._qc.bind_parameters({self.param: value})
+class SingleParameterAnsatz(BaseAnsatz):
+    """
+    Single-parameter ansatz where all Ry gates use the same parameter λ.
+    """
+    
+    def __init__(self, n_qubits: int, depth: int) -> None:
+        """
+        Initialize ansatz.
+        
+        Args:
+            n_qubits (int): Number of qubits
+            depth (int): Number of layers
+        """
+        super().__init__(n_qubits, depth)
+        self.n_params = n_qubits * depth
+    
+    def qc(self, lambda_param: np.ndarray | list[float]) -> QuantumCircuit:
+        """
+        Create single-parameter ansatz circuit.
+        
+        Args:
+            lambda_param (np.ndarray | list[float]): Single parameter λ for all Ry gates
+            
+        Returns:
+            QuantumCircuit
+        """
+
+        lambda_param = float(lambda_param[0])
+        
+        qc = QuantumCircuit(self.n_qubits)
+        
+        for layer in range(self.depth):
+            # Same Ry(λ) on all qubits
+            for q in range(self.n_qubits):
+                qc.ry(lambda_param, q)
+            
+            # CNOT chain
+            for q in range(self.n_qubits - 1):
+                qc.cx(q, q + 1)
+        
+        return qc
+    
+    def random_param(self) -> list[float]:
+        """Generate random parameter in [-π, π]."""
+        return [np.random.uniform(-np.pi, np.pi)]

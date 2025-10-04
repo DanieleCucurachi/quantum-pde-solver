@@ -1,49 +1,56 @@
+from __future__ import annotations
+
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from pathlib import Path
 
-from qiskit.quantum_info import Statevector
-from src.variational import SingleParameterAnsatz, HEAnsatz
-
-
-def reconstruct_function(lambda0: float,
-                         lambdas: np.ndarray | list[float],
-                         n_qubits: int,
-                         depth: int,
-                         domain: list[float]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Reconstruct f(x) from parameters (lambda0, lambda).
-    - Build SingleParameterAnsatz with 'lam'
-    - Get statevector ψ (size N = 2**n_qubits)
-    - Map basis index k to x_k in [domain[0], domain[1]) uniformly (endpoint=True)
-    - Return x, f(x) = lambda0 * ψ_k (real part), and ψ (complex for reference)
-    """
-    N = 2 ** n_qubits
-    x = np.linspace(domain[0], domain[1], N, endpoint=True)
-
-    qc = HEAnsatz(n_qubits=n_qubits, depth=depth).qc(lambdas)
-    psi = Statevector.from_instruction(qc).data  # shape (N,)
-
-    # With Ry-only ansatz and CNOTs, amplitudes are real; be explicit:
-    f = lambda0 * np.real(psi)
-    return x, f, psi
+from src.utils import amplitude_encoding_2d, reconstruct_function
 
 
 # 1D
 
-def time_evolution_dataframe(df_params: pd.DataFrame,
-                             n_qubits: int,
-                             depth: int,
-                             domain: list[float]) -> pd.DataFrame:
+def time_evolution_dataframe_1d(
+    df_params: pd.DataFrame,
+    n_qubits: int,
+    depth: int,
+    domain: list[tuple[float, float]]
+) -> pd.DataFrame:
     """
-    From a dataframe of per-step parameters (time, lambda0, lambda),
-    build a long-form dataframe with columns: time, x, f, psi.
+    Construct a long-form DataFrame representing the time evolution of the variational solution
+    in 1D.
+
+    For each row in the input DataFrame (containing per-step parameters: time, lambda0, lambdas),
+    this function:
+      - Reconstructs the quantum state and the corresponding real-valued function f(x) at each 
+        time step, using the provided quantum circuit parameters.
+      - Maps each basis index to a spatial grid point x in the interval [domain[0][0], domain[0][1]].
+      - Collects the results into a long-form DataFrame with columns:
+            - time: time step value
+            - x: spatial grid point
+            - f: real-valued function at x (from the quantum state)
+            - psi: complex statevector amplitude at x
+
+    Args:
+        df_params (pd.DataFrame): DataFrame with columns ["time", "lambda0", "lambdas"] for each
+                                  time step.
+        n_qubits (int): Number of qubits (defines grid size).
+        depth (int): Number of ansatz layers.
+        domain (list[float]): [xmin, xmax] interval for the spatial grid.
+
+    Returns:
+        pd.DataFrame: Long-form DataFrame with columns ["time", "x", "f", "psi"] for all time steps.
     """
     rows = []
+
+    N = 2 ** n_qubits
+    x = np.linspace(domain[0][0], domain[0][1], N, endpoint=True)
+    
     df_params = df_params.sort_values("time")
+    
     for _, row in df_params.iterrows():
-        x, f, psi = reconstruct_function(
+        f, psi = reconstruct_function(
             lambda0=float(row["lambda0"]),
             lambdas=row["lambdas"],
             n_qubits=n_qubits,
@@ -58,15 +65,28 @@ def time_evolution_dataframe(df_params: pd.DataFrame,
         }))
     return pd.concat(rows, ignore_index=True)
 
-# TODO: remove max _lines, you still want last and first line
-def plot_time_evolution(df_funcs: pd.DataFrame,
-                        max_lines: int = 10,
-                        outfile: str = "exp_results/burgers_evolution.png",
-                        base_color: str = "blue",
+
+def plot_time_evolution_1d(
+    df_funcs: pd.DataFrame,
+    max_lines: int = 5,
+    outfile: str = "exp_results/time_evolution.png",
+    base_color: str = "blue",
 ) -> None:
     """
-    Plot f(x,t) at a handful of times to visualize evolution.
-    - Picks up to 'max_lines' evenly spaced times.
+    Plot the time evolution of the variational solution f(x, t) in 1D.
+
+    For a given DataFrame containing columns ["time", "x", "f"], this function:
+      - Selects up to 'max_lines' time steps, evenly spaced throughout the simulation.
+      - Plots f(x, t) as a line for each selected time step, with color intensity indicating 
+        time order.
+      - Saves the resulting plot to the specified output file.
+
+    Args:
+        df_funcs (pd.DataFrame): Long-form DataFrame with columns ["time", "x", "f"] (and 
+                                 optionally "psi").
+        max_lines (int): Maximum number of time steps to plot (evenly spaced). If None, plot all.
+        outfile (str): Path to save the output plot image.
+        base_color (str): Base color for the plot lines ("blue" or "red").
     """
     times_all = sorted(df_funcs["time"].unique())
     if max_lines is not None and len(times_all) > max_lines:
@@ -110,20 +130,50 @@ def time_evolution_dataframe_2d(
     domain: list[tuple[float, float]],
 ) -> pd.DataFrame:
     """
-    From a dataframe of per-step parameters (time, lambda0, lambda),
-    build a long-form dataframe with columns: time, x, y, f, psi.
-    The 1D vector is mapped to a 2D grid as described.
+    Construct a long-form DataFrame representing the time evolution of the variational solution 
+    in 2D.
+
+    For each row in the input DataFrame (containing per-step parameters: time, lambda0, lambdas),
+    this function:
+      - Reconstructs the quantum state and the corresponding real-valued function f(x, y) 
+        at each time step, using the provided quantum circuit parameters.
+      - Maps each basis index of the 1D statevector to a 2D grid point (x, y) by interpreting the 
+        binary representation of the index: the first half of the bits encodes the x index, the 
+        second half the y index.
+      - The spatial grid is defined by the domain argument, which should be a list of two (min, max) 
+        tuples, one for x and one for y.
+      - Collects the results into a long-form DataFrame with columns:
+            - time: time step value
+            - x: spatial grid point in x
+            - y: spatial grid point in y
+            - f: real-valued function at (x, y) (from the quantum state)
+            - psi: complex statevector amplitude at (x, y)
+
+    Args:
+        df_params (pd.DataFrame): DataFrame with columns ["time", "lambda0", "lambdas"] for each 
+                                  time step.
+        n_qubits (int): Number of qubits (defines grid size; must be even for 2D).
+        depth (int): Number of ansatz layers.
+        domain (list[tuple[float, float]]): [(xmin, xmax), (ymin, ymax)] intervals for the spatial
+                                            grid.
+
+    Returns:
+        pd.DataFrame: Long-form DataFrame with columns ["time", "x", "y", "f", "psi"] for all 
+                      time steps.
     """
     rows = []
     df_params = df_params.sort_values("time")
+
     L = 2 ** n_qubits
     n_side = int(np.sqrt(L))
     assert n_side ** 2 == L, "Number of basis states must be a perfect square for 2D."
+
     (xmin, xmax), (ymin, ymax) = domain
     xs = np.linspace(xmin, xmax, n_side, endpoint=True)
     ys = np.linspace(ymin, ymax, n_side, endpoint=True)
+
     for _, row in df_params.iterrows():
-        _, f, psi = reconstruct_function(
+        f, psi = reconstruct_function(
             lambda0=float(row["lambda0"]),
             lambdas=row["lambdas"],
             n_qubits=n_qubits,
@@ -132,10 +182,7 @@ def time_evolution_dataframe_2d(
         )
         # Map 1D vector to 2D grid
         for idx in range(L):
-            # TODO: amke this a utility function
-            bin_str = format(idx, f'0{n_qubits}b')
-            x_idx = int(bin_str[:n_qubits // 2], 2)
-            y_idx = int(bin_str[n_qubits // 2:], 2)
+            x_idx, y_idx = amplitude_encoding_2d(idx, n_qubits)
             rows.append({
                 "time": row["time"],
                 "x": xs[x_idx],
