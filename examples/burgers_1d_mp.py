@@ -44,7 +44,7 @@ def main():
     # later it will be needed to rescale the state
     # Prepare initial state: Gaussian 
     ansatz = HEAnsatz(n_qubits, depth)
-    target = gaussian_state(n_qubits)
+    target = gaussian_state(n_qubits, domain=[(0.0, 1.0)])
     init_params = ansatz.random_params()
     res = minimize(fidelity, init_params, args=(ansatz, target),
                method="COBYLA", options={"maxiter": 200})

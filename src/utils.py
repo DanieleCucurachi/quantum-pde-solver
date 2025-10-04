@@ -9,14 +9,56 @@ from qiskit import QuantumCircuit, transpile
 from qiskit_aer import Aer, AerSimulator
 
 
-# --- target Gaussian in 1D ---
-# TODO: add domani here!!!
-def gaussian_state(n_qubits: int, sigma=0.15):
-    L = 2**n_qubits
-    xs = np.linspace(0, 1, L, endpoint=False)  # grid
-    f = np.exp(-0.5 * ((xs - 0.5)/sigma)**2)
-    f = f / np.linalg.norm(f)  # normalize
+def gaussian_state(n_qubits: int, domain: list[tuple], sigma=0.15) -> np.ndarray:
+    """
+    Generate a normalized 1D or 2D Gaussian state vector on a grid of length 2**n_qubits.
+
+    Args:
+        n_qubits (int): Number of qubits (defines grid size).
+        domain (list[tuple]): List of tuples specifying the domain for each dimension.
+            - For 1D: [(xmin, xmax)]
+            - For 2D: [(xmin, xmax), (ymin, ymax)]
+        sigma (float): Standard deviation of the Gaussian.
+
+    Returns:
+        np.ndarray: Normalized Gaussian vector of length 2**n_qubits.
+
+    Raises:
+        NotImplementedError: If domain has more than 2 dimensions.
+    """
+    L = 2 ** n_qubits
+
+    if domain is None or len(domain) == 1:
+        # 1D case
+        if domain is not None:
+            xmin, xmax = domain[0]
+            xs = np.linspace(xmin, xmax, L, endpoint=False)
+        else:
+            xs = np.linspace(0, 1, L, endpoint=False)
+        f = np.exp(-0.5 * ((xs - 0.5) / sigma) ** 2)
+    elif len(domain) == 2:
+        # 2D case
+        n_side = int(np.sqrt(L))
+        if n_side ** 2 != L:
+            raise ValueError("For 2D, 2**n_qubits must be a perfect square.")
+        (xmin, xmax), (ymin, ymax) = domain
+        xs = np.linspace(xmin, xmax, n_side, endpoint=False)
+        ys = np.linspace(ymin, ymax, n_side, endpoint=False)
+        f = np.zeros(L)
+        for idx in range(L):
+            # Binary encoding: first half for x, second half for y
+            bin_str = format(idx, f'0{n_qubits}b')  # MSB right, LSB left 
+            x_idx = int(bin_str[:n_qubits // 2], 2)  # int(a, b) converts a to base b 
+            y_idx = int(bin_str[n_qubits // 2:], 2)
+            x = xs[x_idx]
+            y = ys[y_idx]
+            f[idx] = np.exp(-((x - 0.5) ** 2 + (y - 0.5) ** 2) / (2 * sigma ** 2))
+    else:
+        raise NotImplementedError("Only 1D and 2D domains are supported.")
+
+    f = f / np.linalg.norm(f)
     return f
+
 
 # --- fidelity ---
 def fidelity(params, ansatz, target_state):
