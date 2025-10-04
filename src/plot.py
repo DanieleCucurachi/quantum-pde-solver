@@ -55,7 +55,6 @@ def time_evolution_dataframe_1d(
             lambdas=row["lambdas"],
             n_qubits=n_qubits,
             depth=depth,
-            domain=domain,
         )
         rows.append(pd.DataFrame({
             "time": row["time"],
@@ -178,7 +177,6 @@ def time_evolution_dataframe_2d(
             lambdas=row["lambdas"],
             n_qubits=n_qubits,
             depth=depth,
-            domain=[(xmin, xmax), (ymin, ymax)],
         )
         # Map 1D vector to 2D grid
         for idx in range(L):
@@ -223,9 +221,9 @@ def plot_time_evolution_2d(
         ax = axes[i // ncols, i % ncols]
         im = ax.pcolormesh(X, Y, F, cmap=cmap, shading="auto")
         ax.set_title(f"t={t:.3f}")
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
-        fig.colorbar(im, ax=ax)
+        ax.set_xlabel("y")
+        ax.set_ylabel("x")
+        fig.colorbar(im, ax=ax, label="f(x, y, t)")
 
     # Hide unused subplots
     for j in range(i + 1, nrows * ncols):

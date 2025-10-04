@@ -3,3 +3,4 @@ exp_results_old/
 copies/
 pieces_of_code.py
 src/__pycache__/
+examples/__pycache__/

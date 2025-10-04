@@ -5,8 +5,11 @@ from .ansatz import (
     SingleParameterAnsatz,
 )
 
-from .cost_function import(
-    CostFunction
+from .pdes import(
+    Burgers1D,
+    Burgers2D,
+    Diffusion1D,
+    Diffusion2D,
 )
 
 from .utils import (
@@ -17,7 +20,11 @@ from .utils import (
 )
 
 from .ref_solutions import (
-    FiPySolver,
     DiffusionFiPySolver,
     BurgersFiPySolver,
 )
+
+from .time_evo import (
+    prepare_initial_state,
+    run_time_evolution,
+)   
