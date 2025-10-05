@@ -3,6 +3,7 @@
 
 A research-oriented Python package that implements a variational quantum algorithm for solving nonlinear PDEs using a forward Euler time-stepping scheme as proposed in [Lubasch et al., “Variational quantum algorithms for nonlinear problems” (PR A, 2019)](https://arxiv.org/pdf/1907.09032).
 
+**See [`docs/improvements.md`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/docs/improvements.md) for possible improvements to this proof-of-principle solver.**
 
 ## Installation
 
