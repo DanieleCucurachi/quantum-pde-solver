@@ -4,8 +4,8 @@ setup(
     name="quantum-pde-solver",
     version="0.1.0",
     description="Quantum and classical solvers for PDEs using variational quantum circuits and FiPy.",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="Daniele Cucurachi",
+    author_email="daniele.cucurachi@alumni.epfl.ch",
     url="https://github.com/yourusername/quantum-pde-solver",
     packages=find_packages(where=".", exclude=["examples*", "notebooks*", "tests*"]),
     install_requires=[

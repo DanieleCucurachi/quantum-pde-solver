@@ -86,6 +86,7 @@ quantum-pde-solver/
 │   ├── circuit_blocks.ipynb          # Notebook: quantum circuit blocks demos
 │   ├── classical_solver.ipynb        # Classical PDE solver notebook
 │   ├── initial_state_prep.ipynb      # Initial state preparation notebook
+|   ├── tutorial.ipynb                # Tutorial basic functionalities of the repo
 │   ├── images/                       # Images for notebooks and documentation
 │   │   └── fig_s3_lubasch.png
 │   └── exp_results/                  # Output directory for results and plots

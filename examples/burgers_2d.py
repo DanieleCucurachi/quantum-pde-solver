@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument("--n_qubits", type=int, default=4, help="Number of qubits (must be even for 2D)")
     parser.add_argument("--depth", type=int, default=2, help="Ansatz circuit depth")
     # Training/simulation parameters
-    parser.add_argument("--tau", type=float, default=0.1, help="Euler time step")
+    parser.add_argument("--tau", type=float, default=0.5, help="Euler time step")
     parser.add_argument("--nu", type=float, default=0.1, help="Viscosity")
     parser.add_argument("--tmax", type=float, default=5.0, help="Total simulation time")
     parser.add_argument("--sigma", type=float, default=0.15, help="Initial Gaussian width")
