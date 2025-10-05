@@ -32,9 +32,9 @@ This schedule lets you shrink τ when cost signals instability, and grow τ in s
 
 ## Engineering Improvements
 
-### 1. Optimize the Simulation Pipeline
+### 1. Circuits Reuse 
 
-There are several minor improvements
+ At each time steps, the circuits required to compute the cost remain the same, they just use different parameters. You can reuse compiled/transpiled gate sequences for the next time step, instead of creating from scratch each circuit.
 
 ### 2. Better Optimizers & Differentiable Backends  
 
@@ -44,18 +44,11 @@ For example, integrating libraries such as pyqtorch or JAX allows automatic diff
 
 Another possible improvement could come from custom optimizers which work well for optimizing parametrized quantum circuits, such as quantum natural gradient.
 
-#### Parallel / Distributed Circuit Evaluation  
+### 3. Parallel / Distributed Circuit Evaluation  
 
 Another practical improvement is to parallelize the evaluation of multiple quantum circuits across multiple CPU cores (if running on a laptop) or nodes (if running on HPC cluster). For instance with `dask` you can issue each circuit required for computing the cost (e.g. for $A_x$, $A_y$, $D$, etc.) as an independent task. By distributing circuit simulation and measurement, the wall-clock time per time step can drop significantly.
 
-#### Batch & Vectorized Evaluations  
-When your variational ansatz supports vectorization (e.g. through JAX’s vmap or PyTorch’s batch processing), you can evaluate multiple parameter candidates (or measurement circuits) in a single pass. This is useful in population-based or small exploration steps, where you evaluate cost/gradients for multiple $\lambda$ values in parallel. Some quantum-ML frameworks support batching of circuits or parallel evaluation primitives. This reduces overhead in cases where you want to explore nearby parameter sets or compute approximate gradients in batch.
+### 4. Hardware Accelerator Use & Mixed Precision  
 
-#### Warm Starts and Step Reuse  
-Within a time-stepping loop, many circuits and ansatz structures remain largely the same from one time step to the next. You can reuse compiled/transpiled gate sequences, initial parameter guesses, and even previously computed expectation values as starting points for the next time step’s optimizer. This “warm start” strategy reduces redundant work in compilation or circuit construction and helps the optimizer converge faster.
-
-#### Hybrid Accelerator Use & Mixed Precision  
-Leverage hardware accelerators (GPUs, TPUs) using frameworks like JAX to offload linear algebra, continuous optimization, and expectation-value arithmetic. Additionally, use lower-precision arithmetic (e.g. float32 or bfloat16) in parts of the computation where numerical stability allows, to increase throughput. Combined with auto-differentiable backends, this can drastically reduce CPU load and speed up the end-to-end loop.
-
----
+Leverage hardware accelerators (GPUs, TPUs) using frameworks that support vectorization, like JAX or pytorch, to offload linear algebra, continuous optimization, and expectation-value arithmetic. Additionally, use lower-precision arithmetic (such as float32) in parts of the computation where numerical stability allows, to increase throughput. Combined with auto-differentiable backends, this can drastically reduce CPU load and speed up the computation for large size problems.
 
