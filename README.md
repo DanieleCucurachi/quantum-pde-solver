@@ -24,7 +24,7 @@ pip install -e .
 ### Creating an Environment
 You can also set up the environment using the provided environment.yml file:
 ```bash
-conda env create -f [environment.yml](http://_vscodecontentref_/0)
+conda env create -f environment.yml
 conda activate quantum-pde-solver
 ```
 This will install all required dependencies in a new environment named quantum-pde-solver.
@@ -32,6 +32,8 @@ This will install all required dependencies in a new environment named quantum-p
 ---
 
 ## Usage
+
+Start with [`examples/tutorial.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/tutorial.ipynb) for a quick overview of what you can do with this repo.
 
 ### 1. Quantum PDE Solver
 

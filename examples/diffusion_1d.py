@@ -3,7 +3,8 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from src.utils import set_seeds
+from src.utils import set_seeds, gaussian_state, fix_lambda0_sign
+from src.ansatz import HEAnsatz
 from src.pdes import Diffusion1D
 from src.plot import time_evolution_dataframe_1d, plot_time_evolution_1d
 from src.time_evo import (
@@ -37,14 +38,15 @@ def main():
     csv_path = outdir / "data_1d.csv"
 
     print("\n------ Initial State Preparation ------\n")
+    target = gaussian_state(args.n_qubits, domain=domain, sigma=args.sigma)
     lambdas, init_fidelity = prepare_initial_state(
         n_qubits=args.n_qubits,
         depth=args.depth,
-        domain=domain,
-        sigma=args.sigma,
+        target=target,
     )
     lambda0 = 1.0  # Initial scaling factor
-    print("Optimal λ parameters:", lambdas)
+    lambda0 = fix_lambda0_sign(HEAnsatz(args.n_qubits, args.depth), lambdas, lambda0, target)
+    print("Optimal λ parameters:\n- λ0:", lambda0, "\n- λ:", lambdas)
     print("Final fidelity:", init_fidelity)
 
     print("\n------ Time Evolution ------\n")

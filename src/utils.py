@@ -9,8 +9,7 @@ from qiskit.quantum_info import Statevector
 from qiskit import transpile
 from qiskit_aer import Aer, AerSimulator
 
-from .ansatz import BaseAnsatz
-from .ansatz import HEAnsatz
+from .ansatz import BaseAnsatz, HEAnsatz
 
 
 def set_seeds(
@@ -119,6 +118,34 @@ def gaussian_state(
 
     return f
 
+# TODO: move to prepare initial state | find better solution
+def fix_lambda0_sign(
+    ansatz: BaseAnsatz, 
+    lambdas: np.ndarray, 
+    lambda0: float, 
+    target: np.ndarray,
+) -> float:
+    """
+    Ensure the output of the quantum circuit matches the sign of the target state.
+    If the overlap is negative, flip the sign of lambda0.
+
+    Args:
+        ansatz (BaseAnsatz): Ansatz object with .qc(params) method.
+        params (np.ndarray): Optimized ansatz parameters.
+        lambda0 (float): Scaling parameter.
+        target (np.ndarray): Target statevector (numpy array).
+
+    Returns:
+        float: The fixed lambda0 value.
+    """
+
+    qc = ansatz.qc(lambdas)
+    psi = Statevector.from_instruction(qc).data
+    overlap = np.vdot(target, psi)
+    if np.real(overlap) < 0:
+        lambda0 = -lambda0
+    return lambda0
+
 
 def reconstruct_function(
     lambda0: float,
@@ -150,8 +177,7 @@ def reconstruct_function(
     
     qc = HEAnsatz(n_qubits=n_qubits, depth=depth).qc(lambdas)
     psi = Statevector.from_instruction(qc).data  # shape (N,)
-
-    # With Ry-only ansatz and CNOTs, amplitudes are real; be explicit:
+ 
     f = lambda0 * np.real(psi)
     return f, psi
 
