@@ -52,15 +52,11 @@ See [`examples/circuit_blocks.ipynb`](https://github.com/DanieleCucurachi/quantu
 
 ### 3. Initial State Preparation
 
-Optimize a quantum circuit to prepare a target Gaussian state:
-
-- See [`examples/initial_state_prep.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/initial_state_prep.ipynb) for 1D and 2D examples.
+In [`examples/initial_state_prep.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/initial_state_prep.ipynb) a variational quantum circuit is optimized to prepare a Gaussian state for (1D and 2D case are shown).
 
 ### 4. Classical Reference Solutions
 
-Jupyter notebooks in `examples/` demonstrate how to use the classical solvers to compare with quantum results:
-
-- [`examples/classical_solver.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/classical_solver.ipynb) — Solve and visualize 1D/2D Burgers' and Diffusion equations using FiPy.
+[`examples/classical_solver.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/classical_solver.ipynb) contains a tutorial showing how to solve and visualize 1D/2D Burgers' and Diffusion equations using FiPy.
 
 ---
 
