@@ -4,8 +4,8 @@ import argparse
 from pathlib import Path
 
 from src.utils import set_seeds
-from src.pdes import Diffusion1D
-from src.plot import time_evolution_dataframe_1d, plot_time_evolution_1d
+from src.pdes import Diffusion2D
+from src.plot import time_evolution_dataframe_2d, plot_time_evolution_2d
 from src.time_evo import (
     prepare_initial_state,
     run_time_evolution,
@@ -30,11 +30,11 @@ def main():
     args = parse_args()
     set_seeds(args.seed, verbose=True)
 
-    domain = [(0.0, 1.0)]
+    domain = [(0.0, 1.0), (0.0, 1.0)]
     nsteps = int(args.tmax / args.tau)
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
-    csv_path = outdir / "data_1d.csv"
+    csv_path = outdir / "data_2d.csv"
 
     print("\n------ Initial State Preparation ------\n")
     lambdas, init_fidelity = prepare_initial_state(
@@ -51,15 +51,15 @@ def main():
     df = run_time_evolution(
         lambda0=lambda0,
         lambdas=lambdas,
-        pde=Diffusion1D(lambda0, lambdas, args.D, args.tau, args.n_qubits, args.depth),
+        pde=Diffusion2D(lambda0, lambdas, args.D, args.tau, args.n_qubits, args.depth),
         nsteps=nsteps,
     )
     df.to_csv(csv_path, index=False)
     print(f"Saved results to {csv_path.resolve()}")
 
     print("\n------ Results Processing ------\n")
-    df_funcs = time_evolution_dataframe_1d(df, args.n_qubits, args.depth, domain)
-    plot_time_evolution_1d(df_funcs, max_lines = 5, outfile=str(outdir / "time_evo_1d.png"))
+    df_funcs = time_evolution_dataframe_2d(df, args.n_qubits, args.depth, domain)
+    plot_time_evolution_2d(df_funcs, max_plots = 6, outfile=str(outdir / "time_evo_2d.png"))
 
 if __name__ == "__main__":
     main()

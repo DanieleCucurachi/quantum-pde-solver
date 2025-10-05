@@ -2,6 +2,7 @@
 exp_results_old/
 copies/
 pieces_of_code.py
+examples/exp_results/
 
 # Ignore Python cache files
 __pycache__/

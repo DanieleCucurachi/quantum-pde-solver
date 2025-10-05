@@ -288,11 +288,20 @@ class Burgers2D(Burgers1D):
 
 class Diffusion1D(BasePDE):
     """
-    Implements the cost function for a single Euler step of the 1D Diffusion equation.
+    Implements the cost function for a single Euler step of the 1D Diffusion equation
+    using a variational quantum circuit ansatz.
 
     The cost function is:
-      C(λ0, λ) = |λ0|^2
-                 
+      C(λ0, λ) = |λ0|^2 - 2 Re{ λ0 · (tilde_λ0)^* <0| Ũ^† (1 + τ D Δ) U(λ) |0> } + const
+
+    where:
+      - D is the diffusion coefficient,
+      - Δ is the discrete Laplacian operator,
+      - U(λ) and Ũ are parameterized quantum circuits for the current and previous steps.
+
+    Notes:
+    - The constant term is omitted as it does not affect minimization.
+    - The cost is evaluated by running Hadamard-test circuits for the required observables.
     """
 
     def __init__(
@@ -321,16 +330,109 @@ class Diffusion1D(BasePDE):
 
     def cost(self, lambdas: np.ndarray | list[float]) -> float:
         """
+        Compute the variational cost function C(lambda0, lambda) for a single Euler step
+        of the 1D Diffusion equation, up to an additive constant.
+
+        This method assembles and runs Hadamard-test quantum circuits to evaluate
+        the required expectation values for the cost function.
+
+        Args:
+            lambdas (np.ndarray | list[float]): New parameters for the current step,
+                with lambdas[0] as λ0 and lambdas[1:] as the variational parameters.
+
+        Returns:
+            float: The value of the cost function (up to an additive constant).
         """
-        pass
+        lambda0_new = float(lambdas[0])
+        lambdas_new = np.array(lambdas[1:], copy=True)  # TODO: remove copy if not needed
+
+        # 0) build current variational circuit U_var from ansatz
+        ansatz = HEAnsatz(n_qubits=self.n_qubits, depth=self.depth)
+        U_tilde_circ = ansatz.qc(self.lambdas)
+        U_var = ansatz.qc(lambdas_new)
+
+        # 1) build the 3 hadamard-test circuits
+        qc_w0 = circuit_overlap(U_var, U_tilde_circ)                           # w0
+        qc_wA = circuit_adder_overlap_1d(U_var, U_tilde_circ, inverse=False)   # wA
+        qc_wAinv = circuit_adder_overlap_1d(U_var, U_tilde_circ, inverse=True) # wA^{-1}
+
+        # 2) run circuits (use exact statevector)
+        # Note: ancilla_z_exp assumes ancilla is qubit index 0 (first register 'anc')
+        w0 = self.ancilla_z_exp(qc_w0)
+        wA = self.ancilla_z_exp(qc_wA)
+        wAinv = self.ancilla_z_exp(qc_wAinv)
+
+        # 3) assemble LapVal and NonlinVal
+        LapVal = wA + wAinv - 2.0 * w0
+
+        # 4) scalar s = Re <tildeψ|(1+τ O)|ψ>
+        s = w0 + self.tau * self.D * LapVal
+
+        # 5) cost up to const: |λ0|^2 - 2 Re{ λ0 (tilde_λ0)^* s }
+        cost = (lambda0_new ** 2) - 2.0 * np.real(lambda0_new * np.conj(self.lambda0)) * s
+
+        return cost
+        
 
 
 class Diffusion2D(Diffusion1D):
     """
-    Implements the cost function for a single Euler step of the 2D Diffusion equation.
+    Implements the cost function for a single Euler step of the 2D Diffusion equation
+    using a variational quantum circuit ansatz.
+
+    The cost function is:
+      C(λ0, λ) = |λ0|^2 - 2 Re{ λ0 · (tilde_λ0)^* <0| Ũ^† (1 + τ D Δ) U(λ) |0> } + const
+
+    where:
+      - D is the diffusion coefficient,
+      - Δ is the discrete 2D Laplacian operator,
+      - U(λ) and Ũ are parameterized quantum circuits for the current and previous steps.
+
+    Notes:
+    - The constant term is omitted as it does not affect minimization.
     """
     
     def cost(self, lambdas: np.ndarray | list[float]) -> float:
         """
+        Compute the variational cost function C(lambda0, lambda) for a single Euler step
+        of the 2D Diffusion equation, up to an additive constant.
+
+        This method assembles and runs Hadamard-test quantum circuits to evaluate
+        the required expectation values for the cost function in both spatial directions.
+
+        Args:
+            lambdas (np.ndarray | list[float]): New parameters for the current step,
+                with lambdas[0] as λ0 and lambdas[1:] as the variational parameters.
+
+        Returns:
+            float: The value of the cost function (up to an additive constant).
         """
-        pass    
+        lambda0_new = float(lambdas[0])
+        lambdas_new = np.array(lambdas[1:], copy=True)  # TODO: remove copy if not needed
+
+        # 0) build current variational circuit U_var from ansatz
+        ansatz = HEAnsatz(n_qubits=self.n_qubits, depth=self.depth)
+        U_tilde_circ = ansatz.qc(self.lambdas)
+        U_var = ansatz.qc(lambdas_new)
+
+        # 1) build the hadamard-test circuits
+        qc_w0 = circuit_overlap(U_var, U_tilde_circ)                                   
+        qc_wA_x, qc_wA_y = circuit_adder_overlap_2d(U_var, U_tilde_circ, inverse=False)
+        qc_wAinv_x, qc_wAinv_y = circuit_adder_overlap_2d(U_var, U_tilde_circ, inverse=True)    
+
+        # 2) run circuits (use exact statevector)
+        # Note: ancilla_z_exp assumes ancilla is qubit index 0 (first register 'anc')
+        w0 = self.ancilla_z_exp(qc_w0)
+        wA_x, wA_y = self.ancilla_z_exp(qc_wA_x), self.ancilla_z_exp(qc_wA_y)
+        wAinv_x, wAinv_y = self.ancilla_z_exp(qc_wAinv_x), self.ancilla_z_exp(qc_wAinv_y)
+
+        # 3) assemble LapVal and NonlinVal
+        LapVal = (wA_x + wAinv_x + wA_y + wAinv_y) - 4.0 * w0
+
+        # 4) scalar s = Re <tildeψ|(1+τ O)|ψ>
+        s = w0 + self.tau * self.D * LapVal
+
+        # 5) cost up to const: |λ0|^2 - 2 Re{ λ0 (tilde_λ0)^* s }
+        cost = (lambda0_new ** 2) - 2.0 * np.real(lambda0_new * np.conj(self.lambda0)) * s
+
+        return cost

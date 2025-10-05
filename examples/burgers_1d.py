@@ -51,11 +51,7 @@ def main():
     df = run_time_evolution(
         lambda0=lambda0,
         lambdas=lambdas,
-        pde=Burgers1D,
-        nu=args.nu,
-        tau=args.tau,
-        n_qubits=args.n_qubits,
-        depth=args.depth,
+        pde=Burgers1D(lambda0, lambdas, args.nu, args.tau, args.n_qubits, args.depth),
         nsteps=nsteps,
     )
     df.to_csv(csv_path, index=False)

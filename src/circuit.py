@@ -316,8 +316,9 @@ def circuit_nonlinear_overlap_1d(
 
     # QNPU (adder block)
     adder_block = build_adder_block(anc, sys)
+    # TODO: add option to invert diag block too?
     if inverse:
-        raise NotImplementedError("Inverse not implemented yet for 1D nonlinear overlap")
+        adder_block = adder_block.inverse()
     qc.compose(adder_block, inplace=True)
 
     # Controlled U_tilde^\dagger
@@ -379,9 +380,11 @@ def circuit_nonlinear_overlap_2d(
     # QNPU (adder block)
     adder_block_x = build_adder_block(anc, sys_x)
     adder_block_y = build_adder_block(anc, sys_y)
+    # TODO: add option to invert diag block too?
     if inverse:
-        raise NotImplementedError("Inverse not implemented yet for 2D nonlinear overlap")
-    
+        adder_block_x = adder_block_x.inverse()
+        adder_block_y = adder_block_y.inverse()
+
     # Controlled U_tilde^\dagger diag
     U_tilde_gate = U_tilde.to_gate(label="U_tilde")
     U_tilde_dag_gate = U_tilde_gate.inverse()
