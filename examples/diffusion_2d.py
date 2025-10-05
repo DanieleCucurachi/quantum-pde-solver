@@ -14,7 +14,7 @@ from src.time_evo import (
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="2D Quantum Burgers Simulation")
+    parser = argparse.ArgumentParser(description="2D Diffusion Simulation")
     # Circuit/ansatz parameters
     parser.add_argument("--n_qubits", type=int, default=4, help="Number of qubits (must be even for 2D)")
     parser.add_argument("--depth", type=int, default=2, help="Ansatz circuit depth")

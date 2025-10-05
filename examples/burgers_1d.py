@@ -14,14 +14,14 @@ from src.time_evo import (
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="2D Quantum Burgers Simulation")
+    parser = argparse.ArgumentParser(description="1D Burgers Simulation")
     # Circuit/ansatz parameters
     parser.add_argument("--n_qubits", type=int, default=4, help="Number of qubits (must be even for 2D)")
     parser.add_argument("--depth", type=int, default=2, help="Ansatz circuit depth")
     # Training/simulation parameters
     parser.add_argument("--tau", type=float, default=0.5, help="Euler time step")
     parser.add_argument("--nu", type=float, default=0.1, help="Viscosity")
-    parser.add_argument("--tmax", type=float, default=2.0, help="Total simulation time")
+    parser.add_argument("--tmax", type=float, default=5.0, help="Total simulation time")
     parser.add_argument("--sigma", type=float, default=0.15, help="Initial Gaussian width")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--outdir", type=str, default="examples/exp_results/burgers", help="Output directory")

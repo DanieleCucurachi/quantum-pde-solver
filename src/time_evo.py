@@ -92,7 +92,8 @@ def run_time_evolution(
         "lambdas": params[1:].copy(),  # store initial lambdas
           "cost":pde.cost(params),
     })
-    print(f"Step 0/{nsteps}, time=0.00")
+    if verbose:
+        print(f"Step 0/{nsteps} -> cost: {rows[0]['cost']}   (time=0.00)")
 
     for step in range(nsteps):
         t = (step + 1) * pde.tau
