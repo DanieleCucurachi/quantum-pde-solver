@@ -21,6 +21,14 @@ pip install -e .
 - fipy
 - typing_extensions
 
+### Creating an Environment
+You can also set up the environment using the provided environment.yml file:
+```bash
+conda env create -f [environment.yml](http://_vscodecontentref_/0)
+conda activate quantum-pde-solver
+```
+This will install all required dependencies in a new environment named quantum-pde-solver.
+
 ---
 
 ## Usage
