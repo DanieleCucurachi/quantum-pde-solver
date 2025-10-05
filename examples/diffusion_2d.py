@@ -20,7 +20,7 @@ def parse_args():
     parser.add_argument("--depth", type=int, default=2, help="Ansatz circuit depth")
     # Training/simulation parameters
     parser.add_argument("--tau", type=float, default=0.5, help="Euler time step")
-    parser.add_argument("--D", type=float, default=0.1, help="Diffusion coefficient")
+    parser.add_argument("--D", type=float, default=1, help="Diffusion coefficient")
     parser.add_argument("--tmax", type=float, default=5.0, help="Total simulation time")
     parser.add_argument("--sigma", type=float, default=0.15, help="Initial Gaussian width")
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
