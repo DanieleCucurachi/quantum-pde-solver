@@ -115,9 +115,12 @@ def plot_time_evolution_1d(
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(out_path, dpi=150)
+    if outfile is not None:
+        out_path = Path(outfile)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(out_path, dpi=150)
+        print(f"Saved time evolution plot to {out_path.resolve()}")
     plt.show()
-    print(f"Saved time evolution plot to {out_path.resolve()}")
 
 
 # 2D
@@ -190,11 +193,12 @@ def time_evolution_dataframe_2d(
             })
     return pd.DataFrame(rows)
 
+
 def plot_time_evolution_2d(
     df_funcs: pd.DataFrame,
     max_plots: int = 16,
     outfile: str = "exp_results/burgers_evolution_2d.png",
-    cmap: str = "viridis"
+    cmap: str = "viridis",
 ) -> None:
     """
     For each selected time, plot f(x, y, t) as a 2D heatmap in a subplot.
@@ -230,8 +234,9 @@ def plot_time_evolution_2d(
         axes[j // ncols, j % ncols].axis('off')
 
     plt.tight_layout()
-    out_path = Path(outfile)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(out_path, dpi=150)
+    if outfile is not None:
+        out_path = Path(outfile)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(out_path, dpi=150)
+        print(f"Saved 2D time evolution plot to {out_path.resolve()}")
     plt.show()
-    print(f"Saved 2D time evolution plot to {out_path.resolve()}")
