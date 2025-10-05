@@ -43,7 +43,7 @@ Solve the 2D diffusion equation with:
 python examples/diffusion_2d.py --n_qubits 4 --depth 2 --tau 0.1 --D 0.1 --tmax 5.0 --sigma 0.15 --seed 42
 ```
 
-All simulation parameters can be set via command-line arguments. The same command can be used for diffusion 1 and 2D, and Burgers 1 and 2D.
+All simulation parameters can be set via command-line arguments. The same command can be used for diffusion 1 and 2D, and Burgers 1 and 2D, just make sure to use the appropriate constants ($D$ for diffusion, $\nu$ for Burgers).
 
 ### 2. Circuit Blocks Creation
 
