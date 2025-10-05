@@ -48,11 +48,11 @@ All simulation parameters can be set via command-line arguments. The same comman
 
 ### 2. Circuit Blocks Creation
 
-See [`examples/circuit_blocks.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/circuit_blocks.ipynb) tutorial for step-by-step examples on how to construct the fundamental quantum circuit blocks described in [Lubasch et al., “Variational quantum algorithms for nonlinear problems” (PR A, 2019)](https://arxiv.org/pdf/1907.09032).
+[`examples/circuit_blocks.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/circuit_blocks.ipynb) contains examples on how to construct the fundamental circuit blocks described in [Lubasch et al., “Variational quantum algorithms for nonlinear problems” (PR A, 2019)](https://arxiv.org/pdf/1907.09032).
 
 ### 3. Initial State Preparation
 
-In [`examples/initial_state_prep.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/initial_state_prep.ipynb) a variational quantum circuit is optimized to prepare a Gaussian state for (1D and 2D case are shown).
+In [`examples/initial_state_prep.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/initial_state_prep.ipynb) a variational quantum circuit is optimized to prepare a Gaussian state (1D and 2D case are shown).
 
 ### 4. Classical Reference Solutions
 
