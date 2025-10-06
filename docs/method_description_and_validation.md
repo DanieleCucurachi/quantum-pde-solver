@@ -76,14 +76,14 @@ for step in range(nsteps):
 ### 5. Validation and Consistency Checks (!WORK IN PROGRESS!)
 
 
-##### **Norm Conservation**
+#### **Norm Conservation**
 
 
-##### **Cost Function Monitoring**
+#### **Cost Function Monitoring**
 
 
 
-##### **Visualization & Physical Consistency Checks**
+#### **Visualization & Physical Consistency Checks**
 Snapshots of $$f(x, y, t)$$ are generated at selected time points using the visualization tools in `src/plot.py`.  
 
 ```python
@@ -96,7 +96,7 @@ Validation includes verifying that the dynamics obey known physical symmetries a
 - **Expected physical trends:** For diffusion-like processes, $$f(x,y,t)$$ should exhibit progressive smoothing over time; for Hamiltonian evolution, total energy should be conserved.  
 - **Parameter dependence:** Convergence and accuracy should improve with smaller time-step $$\tau$$ and increased ansatz depth or circuit expressivity.
 
-##### **Validation Against Classical Solvers**
+#### **Validation Against Classical Solvers**
 
 Where feasible, quantum results are validated against classical finite-difference or spectral solvers using identical grids and boundary conditions.  
 - **Quantitative metrics:** Compute standard error measures such as  
@@ -106,7 +106,7 @@ Where feasible, quantum results are validated against classical finite-differenc
 This comparison provides a ground truth for small or moderate system sizes.
 
 
-##### **Standard Sanity Checks**
+#### **Standard Sanity Checks**
 
 - **Expected behavior:** Verify that results converge smoothly as grid resolution / ansatz complexity increases or $\tau$ (time step) decreases.  
 - **Stability:** Small perturbations in initialization or hyperparameters should not drastically alter the outcome. 

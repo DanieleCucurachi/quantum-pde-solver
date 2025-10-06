@@ -5,6 +5,8 @@ A research-oriented Python package that implements a variational quantum algorit
 
 **See [`docs/improvements.md`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/docs/improvements.md) for possible improvements to this proof-of-principle solver.**
 
+**See [`docs/method_description_and_validation.md`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/docs/method_description_and_validation.md) for a short description of the pipeline implementig the algorithm.**
+
 ## Installation
 
 Clone the repository and install dependencies:
