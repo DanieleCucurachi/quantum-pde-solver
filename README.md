@@ -22,7 +22,6 @@ pip install -e .
 - numpy, scipy, matplotlib, pandas
 - qiskit, qiskit-aer
 - fipy
-- typing_extensions
 
 ### Creating an Environment
 You can also set up the environment using the provided environment.yml file:

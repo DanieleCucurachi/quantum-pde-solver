@@ -52,7 +52,7 @@ lambdas, init_fidelity = prepare_initial_state(
 
 See [`examples/initial_state_prep.ipynb`](https://github.com/DanieleCucurachi/quantum-pde-solver/blob/main/examples/initial_state_prep.ipynb) for more details.
 
-### 3. Cost Function Construction
+### 3. Cost Function Construction (!WORK IN PROGRESS! I will add more details)
 
 At each time step, the cost function is constructed as:
 
