@@ -8,21 +8,19 @@ Adaptive time stepping consists in changing the size of the time step $\tau$ dur
 
 Let us start by picking a tolerance $C_{\rm tol}$. After optimizing for a timestep $\tau_n$, compute the residual cost:
 
-$$ C_{\rm res} = \bigl\|\lambda_0|\psi(\lambda)\rangle - (1 + \tau_n\,\hat O)\,\tilde\lambda_0|\tilde\psi\rangle\bigr\|^2.$$
+$$C_{\rm res} = \bigl\|\lambda_0|\psi(\lambda)\rangle - (1 + \tau_n\,\hat O)\,\tilde\lambda_0|\tilde\psi\rangle\bigr\|^2.$$
 
 Then:
 
 - If $C_{\rm res} > C_{\rm tol}$, the step is too aggressive ⇒ reduce:
-  $$
-  \tau_{n+1} = \max\bigl(\tau_n \cdot \alpha_{\rm dec},\; \tau_{\min}\bigr),
-  $$
+  
+  $$\tau_{n+1} = \max\bigl(\tau_n \cdot \alpha_{\rm dec},\; \tau_{\min}\bigr),$$
   where $\alpha_{\rm dec} < 1$ (e.g. 0.5) and $\tau_{\min}$ is a lower bound.
 
 - Else (step acceptable), accept and optionally increase:
-  $$
-  \tau_{n+1} = \min\bigl(\tau_n \cdot \alpha_{\rm inc},\; \tau_{\max}\bigr),
-  $$
-  with $\alpha_{\rm inc} > 1$ (e.g. 1.2) and upper bound $\tau_{\max}$.
+  
+  $$\tau_{n+1} = \min\bigl(\tau_n \cdot \alpha_{\rm inc},\; \tau_{\max}\bigr),$$
+  
 
 Optionally, require $C_{\rm res} \le (1 + \varepsilon)\,C_{\rm prev}$ (with small $\varepsilon$) to guard against drift (as in drifting away from stability). 
 
